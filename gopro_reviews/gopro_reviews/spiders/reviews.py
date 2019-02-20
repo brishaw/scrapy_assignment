@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy import Request
 
 
 class ReviewsSpider(scrapy.Spider):
     name = 'reviews'
     allowed_domains = ['amazon.com']
-    productUrl = "https://www.amazon.com/GoPro-Fusion-Waterproof-Digital-Spherical/product-reviews/B0792MJLNM/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber="
-    start_urls = []
-
-    # have the spider scrape all of the reviews by concatenating the 'page numbers' to the end of the productUrl.
-    # there are 61 reviews, not 61 pages, however, I thought this would guarantee all the reviews.
-    for i in range(1, 61):
-        start_urls.append(productUrl+str(i))
+    start_urls = ["https://www.amazon.com/GoPro-Fusion-Waterproof-Digital-Spherical/product-reviews/B0792MJLNM/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews"]
 
     def parse(self, response):
         ret = response.css('#cm_cr-review_list')
@@ -26,3 +21,8 @@ class ReviewsSpider(scrapy.Spider):
         for review in starRating:
             yield{'Stars': ''.join(review.xpath('.//text()').extract()),'Title': ''.join(title.xpath('.//text()').extract()), 'Review': ''.join(uniqeReview[count].xpath(".//text()").extract())}
             count = count + 1
+        
+        relative_next_url = response.xpath('//*[@id="cm_cr-pagination_bar"]/ul/li[2]/a').extract_first()
+        absolute_next_url = response.urljoin(relative_next_url)
+
+        yield Request(absolute_next_url, callback=self.parse)
