@@ -18,6 +18,8 @@ from scrapy.conf import settings
 from scrapy.exceptions import DropItem
 from scrapy import log
 
+import json
+
 class MongoDBPipeline(object):
 
     def __init__(self):
@@ -38,4 +40,17 @@ class MongoDBPipeline(object):
             self.collection.insert(dict(item))
             log.msg("Review added to MongoDB database!",
                     level=log.DEBUG, spider=spider)
+        return item
+
+class JsonWritePipeline(object):
+
+    def open_spider(self, spider):
+        self.file = open('items.jl', 'w')
+
+    def close_spider(self, spider):
+        self.file.close()
+
+    def process_item(self, item, spider):
+        line = json.dumps(dict(item)) + "\n"
+        self.file.write(line)
         return item
