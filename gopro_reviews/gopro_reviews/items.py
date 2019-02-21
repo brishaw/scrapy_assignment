@@ -14,6 +14,6 @@ import scrapy
 from scrapy.item import Item, Field
 
 class GoproReviewsItem(Item):
-    starRating = Field()
-    title = Field()
-    uniqueReview = Field()
+    Review_ID = Field()
+    Author = Field()
+    Review = Field()
