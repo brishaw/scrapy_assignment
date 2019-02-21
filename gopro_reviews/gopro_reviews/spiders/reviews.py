@@ -2,6 +2,7 @@
 import scrapy
 from scrapy import Request
 
+from gopro_reviews.items import GoproReviewsItem
 
 class ReviewsSpider(scrapy.Spider):
     name = 'reviews'
@@ -9,20 +10,14 @@ class ReviewsSpider(scrapy.Spider):
     start_urls = ["https://www.amazon.com/GoPro-Fusion-Waterproof-Digital-Spherical/product-reviews/B0792MJLNM/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews"]
 
     def parse(self, response):
-        ret = response.css('#cm_cr-review_list')
-        # collecting star ratings
-        starRating = ret.css('.review-rating')
-        # collecting titles of each review
-        title = ret.css('.review-title')
-        # collecting all unique reviews
-        uniqeReview = ret.css('.review-text')
-        count = 0
+        for item in response.css('.a-section.review'):
+            if item.css('div::attr(data-hook)').extract_first() == 'review':
+                yield {
+                        'Review_ID': item.css('div.a-section.celwidget::attr(id)').extract_first().split('-')[1],
+                        'Author': item.css('span.a-profile-name::text').extract_first(),
+                        'Review': ' '.join(item.css('span.review-text::text').extract())
+                        }
 
-        for review in starRating:
-            yield{'Stars': ''.join(review.xpath('.//text()').extract()),'Title': ''.join(title.xpath('.//text()').extract()), 'Review': ''.join(uniqeReview[count].xpath(".//text()").extract())}
-            count = count + 1
-        
-        relative_next_url = response.xpath('//*[@id="cm_cr-pagination_bar"]/ul/li[2]/a').extract_first()
-        absolute_next_url = response.urljoin(relative_next_url)
-
-        yield Request(absolute_next_url, callback=self.parse)
+        next_page = response.css('.a-last > a::attr(href)').extract_first()
+        if next_page is not None:
+            yield response.follow(next_page, callback=self.parse)

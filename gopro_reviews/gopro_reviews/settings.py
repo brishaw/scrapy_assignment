@@ -68,6 +68,15 @@ ROBOTSTXT_OBEY = True
 #    'gopro_reviews.pipelines.GoproReviewsPipeline': 300,
 #}
 
+ITEM_PIPELINES = {
+    'gopro_reviews.pipelines.MongoDBPipeline': 300,
+}
+
+MONGODB_SERVER = "localhost"
+MONGODB_PORT = 27017
+MONGODB_DB = "amazon"
+MONGODB_COLLECTION = "reviews"
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
