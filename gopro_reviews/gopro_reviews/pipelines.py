@@ -37,7 +37,8 @@ class MongoDBPipeline(object):
                 valid = False
                 raise DropItem("Missing {0}!".format(data))
         if valid:
-            self.collection.insert(dict(item))
+            #self.collection.insert(dict(item))
+            self.collection.update({'Review_ID': item['Review_ID']}, dict(item), upsert=True)
             log.msg("Review added to MongoDB database!",
                     level=log.DEBUG, spider=spider)
         return item
