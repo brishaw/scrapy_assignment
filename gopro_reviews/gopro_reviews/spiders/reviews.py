@@ -2,6 +2,7 @@
 import scrapy
 from scrapy import Request
 
+from gopro_reviews.items import GoproReviewsItem
 
 class ReviewsSpider(scrapy.Spider):
     name = 'reviews'
@@ -10,18 +11,20 @@ class ReviewsSpider(scrapy.Spider):
 
     def parse(self, response):
         ret = response.css('#cm_cr-review_list')
+
+        item = GoproReviewsItem()
         # collecting star ratings
-        starRating = ret.css('.review-rating')
+        item['starRating'] = ret.css('.review-rating')
         # collecting titles of each review
-        title = ret.css('.review-title')
+        item['title'] = ret.css('.review-title')
         # collecting all unique reviews
-        uniqeReview = ret.css('.review-text')
+        item['uniqueReview'] = ret.css('.review-text')
         count = 0
 
-        for review in starRating:
-            yield{'Stars': ''.join(review.xpath('.//text()').extract()),'Title': ''.join(title.xpath('.//text()').extract()), 'Review': ''.join(uniqeReview[count].xpath(".//text()").extract())}
+        for review in item['starRating']:
+            yield{'Stars': ''.join(review.xpath('.//text()').extract()), 'Title': ''.join(item['title'].xpath('.//text()').extract()), 'Review': ''.join(item['uniqueReview'][count].xpath(".//text()").extract())}
             count = count + 1
-        
+
         relative_next_url = response.xpath('//*[@id="cm_cr-pagination_bar"]/ul/li[2]/a').extract_first()
         absolute_next_url = response.urljoin(relative_next_url)
 
