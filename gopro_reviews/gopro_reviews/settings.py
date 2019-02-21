@@ -70,8 +70,9 @@ ROBOTSTXT_OBEY = True
 
 ITEM_PIPELINES = {
     'gopro_reviews.pipelines.MongoDBPipeline': 300,
+    'gopro_reviews.pipelines.JsonWritePipeline': 800
 }
-
+DOWNLOAD_DELAY = 3.0
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017
 MONGODB_DB = "amazon"
